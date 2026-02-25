@@ -16,7 +16,7 @@ export class CreateRoomsAndMembers1700000000002 implements MigrationInterface {
         "type" "public"."rooms_type_enum" NOT NULL DEFAULT 'PUBLIC',
         "creator_id" uuid NOT NULL,
         "creator_wallet_address" character varying(56),
-        "entryFee" numeric(18,8),
+        "entry_fee" numeric(18,8),
         "token_address" character varying(56),
         "max_members" integer DEFAULT 100,
         "expires_at" TIMESTAMP,
@@ -33,16 +33,16 @@ export class CreateRoomsAndMembers1700000000002 implements MigrationInterface {
         "room_id" uuid NOT NULL,
         "user_id" uuid NOT NULL,
         "transaction_hash" character varying,
-        "paidAmount" numeric(18,8),
+        "paid_amount" numeric(18,8),
         "joined_at" TIMESTAMP NOT NULL DEFAULT now(),
         CONSTRAINT "PK_room_members" PRIMARY KEY ("id"),
         CONSTRAINT "UQ_room_user" UNIQUE ("room_id", "user_id"),
-        CONSTRAINT "UQ_transaction_hash" UNIQUE ("transaction_hash")
+
       )
     `);
 
     await queryRunner.query(`
-      CREATE INDEX "IDX_room_members_room_id_user_id" ON "room_members" ("room_id", "user_id")
+      CREATE UNIQUE INDEX "UQ_transaction_hash" ON "room_members" ("transaction_hash") WHERE "transaction_hash" IS NOT NULL
     `);
 
     await queryRunner.query(`
@@ -75,7 +75,7 @@ export class CreateRoomsAndMembers1700000000002 implements MigrationInterface {
     await queryRunner.query(`ALTER TABLE "rooms" DROP CONSTRAINT "FK_rooms_creator"`);
     await queryRunner.query(`DROP INDEX "public"."IDX_rooms_type_active"`);
     await queryRunner.query(`DROP INDEX "public"."IDX_rooms_creator_id"`);
-    await queryRunner.query(`DROP INDEX "public"."IDX_room_members_room_id_user_id"`);
+    await queryRunner.query(`DROP INDEX "public"."UQ_transaction_hash"`);
     await queryRunner.query(`DROP TABLE "room_members"`);
     await queryRunner.query(`DROP TABLE "rooms"`);
     await queryRunner.query(`DROP TYPE "public"."rooms_type_enum"`);
